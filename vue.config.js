@@ -34,7 +34,8 @@ module.exports = {
                 alias: {
                     '@': path.resolve(__dirname, './src'),
                     '@c': path.resolve(__dirname, './src/components'),
-                    '@p': path.resolve(__dirname, './src/views')
+                    '@p': path.resolve(__dirname, './src/views'),
+                    '@static': path.resolve(__dirname, './static'),
                 } // 别名配置
             }
         })
@@ -54,7 +55,7 @@ module.exports = {
     // webpack-dev-server 相关配置
     devServer: {
         open: true,
-        host: '0.0.0.0', // 允许外部ip访问
+        host: 'localhost', // 允许外部ip访问
         port: 10089, // 端口
         https: false, // 启用https
         overlay: {
