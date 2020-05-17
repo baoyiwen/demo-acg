@@ -12,11 +12,11 @@
                     active-text-color="#66ccff"
                     :router=true
             >
-                <template v-for="(router, index) in formatRoutes">
-                    <el-submenu :index="router.path" v-if="router.children" :key="router.mode.key">
+                <template v-for="(router, index) in routes">
+                    <el-submenu :index="router.path" v-if="router.children" :key="router.meta.key">
                         <template slot="title">
                             <i class="el-icon-menu"></i>
-                            <span slot="title">{{router.mode.name}}</span>
+                            <span slot="title">{{router.meta.name}}</span>
                         </template>
                         <template>
                             <el-menu-item-group v-for="(child, index) in router.children" :key="index">
@@ -24,16 +24,16 @@
                                 <el-menu-item
                                         :index="c.path"
                                         v-for="(c, index) in child.children"
-                                        :key="c.mode.key"
+                                        :key="c.meta.key"
                                 >
-                                    {{c.mode.name}}
+                                    {{c.meta.name}}
                                 </el-menu-item>
                             </el-menu-item-group>
                         </template>
                     </el-submenu>
                     <el-menu-item :index="router.path" v-else>
                         <i class="el-icon-setting"></i>
-                        <span slot="title">{{router.mode.name}}</span>
+                        <span slot="title">{{router.meta.name}}</span>
                     </el-menu-item>
                 </template>
             </el-menu>
@@ -53,6 +53,7 @@
             return {
                 isCollapse: false,
                 collapseFlag: false,
+                newRoutes: [],
             }
         },
         props: {
@@ -60,53 +61,18 @@
         },
         computed: {
             ...mapState(['routes']),
-            formatRoutes() {
-                const _this = this;
-                let routes = _this.routes,
-                    newRoutes = [];
-                routes.forEach((router, index) => {
-                    let newChilds = [];
-                    if (router.children) {
-                        // console.log(router);
-                        let temp = router.children;
-                        for (let i = 0; i < router.children.length; i++) {
-                            let test = {
-                                groupName: '',
-                                children: [],
-                            };
-                            if (temp.length) {
-                                for (let j = 0; j < temp.length; j++) {
-                                    if (temp[j].mode !== undefined) {
-                                        if (router.children[i].mode.group === temp[j].mode.group) {
-                                            test.groupName = temp[j].mode.groupName;
-                                            test.children.push(temp[j]);
-                                        }
-                                    }
-                                }
-                            }
-                            newChilds.push(test);
-                        }
-                        for (let i = 0; i < newChilds.length; i++) {
-                            for (let j = i + 1; j < newChilds.length; j++) {
-                                if (newChilds[i].groupName === newChilds[j].groupName) {
-                                    newChilds.splice(j, 1)
-                                    j--;
-                                }
-                            }
-                        }
-                        router.children = newChilds;
-                    }
-                    newRoutes.push(router)
-                });
-                return newRoutes;
-            },
+        },
+        created() {
+            this.getRouters();
         },
         mounted() {
             const _this = this;
             window.onload = function () {
                 _this.onSizeWin();
             }
-            _this.getRouters();
+           //  _this.testRoutes();
+            //
+            console.log(_this.routes);
         },
 
         methods: {
@@ -136,7 +102,51 @@
                 const _this = this;
                 _this.$store.dispatch('getRoutes');
             },
-        }
+            // testRoutes() {
+            //     // console.log(this.$router.options.routes[0])
+            //     let routes = this.$router.options.routes[0].children,
+            //         newRoutes = [];
+            //     for (let i = 0; i < routes.length; i++) {
+            //         let newChilds = [],
+            //             router = routes[i];
+            //         if (routes[i].children !== undefined) {
+            //             let tempRouteChild = routes[i].children;
+            //             // console.log(tempRouteChild);
+            //             // for (let j = 0; j < tempRouteChild.length; j++) {
+            //             //     for (let x = 0; x < tempRouteChild.length; x++) {
+            //             //         console.log(tempRouteChild[x].meta.group);
+            //             //     }
+            //             // }
+            //             for (let j = 0; j < router.children.length; j++) {
+            //                 let tempRouter = {
+            //                         groupName: '',
+            //                         children: [],
+            //                     },
+            //                     routerChild1 = router.children[j];
+            //                 for (let x = 0; x < router.children.length; x++) {
+            //                     let routerChild2 = router.children[x];
+            //                     if (routerChild1.meta.group === routerChild2.meta.group) {
+            //                         tempRouter.groupName = routerChild2.meta.groupName;
+            //                         tempRouter.children.push(routerChild2);
+            //                     }
+            //                 }
+            //                 newChilds.push(tempRouter);
+            //             }
+            //             // 去除数组中相同的数据
+            //             for (let i = 0; i < newChilds.length; i++) {
+            //                 for (let j = i + 1; j < newChilds.length; j++) {
+            //                     if (newChilds[i].groupName === newChilds[j].groupName) {
+            //                         newChilds.splice(j, 1);
+            //                         j--;
+            //                     }
+            //                 }
+            //             }
+            //             router.children = newChilds;
+            //         }
+            //         this.newRoutes.push(router)
+            //     }
+            // },
+        },
     }
 </script>
 

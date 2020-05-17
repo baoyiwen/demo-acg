@@ -8,7 +8,6 @@
 </template>
 
 <script>
-// @ is an alias to /src
 import HelloWorld from '@c/HelloWorld.vue'
 
 export default {
@@ -19,6 +18,7 @@ export default {
   data(){
     return{
       test: "",
+      test2: '',
     }
   }
 }

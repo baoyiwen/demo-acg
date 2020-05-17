@@ -4,12 +4,12 @@ import layout from '@/views/layout/Layout'
 
 Vue.use(VueRouter)
 
-const routes = [
+export const routes = [
     {
         path: '/',
         name: 'layout',
         component: layout,
-        mode: {
+        meta: {
             lv: 0,
             name: 'main'
         },
@@ -17,7 +17,7 @@ const routes = [
             {
                 path: '/',
                 name: 'home',
-                mode: {
+                meta: {
                     lv: 1,
                     name: '主页',
                     groupType: true,
@@ -32,7 +32,7 @@ const routes = [
                     {
                         path: '/home',
                         name: 'home',
-                        mode: {
+                        meta: {
                             lv: 1,
                             name: '主页',
                             group: 1,
@@ -47,7 +47,7 @@ const routes = [
                     {
                         path: '/home1',
                         name: 'home1',
-                        mode: {
+                        meta: {
                             lv: 1,
                             name: '主页1',
                             group: 1,
@@ -62,7 +62,7 @@ const routes = [
                     {
                         path: '/test5',
                         name: 'test5',
-                        mode: {
+                        meta: {
                             lv: 1,
                             name: '测试5',
                             group: 2,
@@ -79,7 +79,7 @@ const routes = [
             {
                 path: '/about',
                 name: 'about',
-                mode: {
+                meta: {
                     lv: 1,
                     name: '关于',
                     key: '2'
@@ -92,7 +92,7 @@ const routes = [
             {
                 path: '/test1',
                 name: 'test1',
-                mode: {
+                meta: {
                     lv: 1,
                     name: '测试1',
                     key: 3,
@@ -105,7 +105,7 @@ const routes = [
             {
                 path: '/test2',
                 name: 'test2',
-                mode: {
+                meta: {
                     lv: 1,
                     name: '测试2',
                     key: "4"
@@ -118,7 +118,7 @@ const routes = [
             {
                 path: '/test3',
                 name: 'test3',
-                mode: {
+                meta: {
                     lv: 1,
                     name: '测试3',
                     key: '5'
@@ -131,7 +131,7 @@ const routes = [
             {
                 path: '/test4',
                 name: 'test4',
-                mode: {
+                meta: {
                     lv: 1,
                     name: '测试4',
                     key: "6"
@@ -160,3 +160,6 @@ const router = new VueRouter({
 })
 
 export default router
+export const mapRoutes = {
+
+}

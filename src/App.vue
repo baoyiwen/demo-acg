@@ -8,7 +8,6 @@
         name: 'app',
         data () {
             return {
-
             }
         },
     }
