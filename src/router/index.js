@@ -19,13 +19,15 @@ const routes = [
                 name: 'home',
                 mode: {
                     lv: 1,
-                    name: '主页'
+                    name: '主页',
+                    groupType: true,
+                    key: '1'
                 },
                 // route level code-splitting
                 // this generates a separate chunk (about.[hash].js) for this route
                 // which is lazy-loaded when the route is visited.
-                component: () => import(/* webpackChunkName: "about" */ '@/views/Home.vue'),
-                redirect: 'home',
+                component: () => import(/* webpackChunkName: "about" */ '@/views/layout/Home/home.vue'),
+                redirect: '/home',
                 children: [
                     {
                         path: '/home',
@@ -33,7 +35,9 @@ const routes = [
                         mode: {
                             lv: 1,
                             name: '主页',
-                            group: '第一组',
+                            group: 1,
+                            groupName: '第一组',
+                            key: '1-1'
                         },
                         // route level code-splitting
                         // this generates a separate chunk (about.[hash].js) for this route
@@ -41,17 +45,34 @@ const routes = [
                         component: () => import(/* webpackChunkName: "about" */ '@/views/Home.vue'),
                     },
                     {
-                        path: '/home2',
-                        name: 'home',
+                        path: '/home1',
+                        name: 'home1',
                         mode: {
                             lv: 1,
-                            name: '主页',
-                            group: '第2组',
+                            name: '主页1',
+                            group: 1,
+                            groupName: '第一组',
+                            key: '1-2'
                         },
                         // route level code-splitting
                         // this generates a separate chunk (about.[hash].js) for this route
                         // which is lazy-loaded when the route is visited.
                         component: () => import(/* webpackChunkName: "about" */ '@/views/Home.vue'),
+                    },
+                    {
+                        path: '/test5',
+                        name: 'test5',
+                        mode: {
+                            lv: 1,
+                            name: '测试5',
+                            group: 2,
+                            groupName: '第二组',
+                            key: '1-3',
+                        },
+                        // route level code-splitting
+                        // this generates a separate chunk (about.[hash].js) for this route
+                        // which is lazy-loaded when the route is visited.
+                        component: () => import(/* webpackChunkName: "about" */ '@/views/layout/test5/test5.vue'),
                     }
                 ],
             },
@@ -61,6 +82,7 @@ const routes = [
                 mode: {
                     lv: 1,
                     name: '关于',
+                    key: '2'
                 },
                 // route level code-splitting
                 // this generates a separate chunk (about.[hash].js) for this route
@@ -73,6 +95,7 @@ const routes = [
                 mode: {
                     lv: 1,
                     name: '测试1',
+                    key: 3,
                 },
                 // route level code-splitting
                 // this generates a separate chunk (about.[hash].js) for this route
@@ -85,6 +108,7 @@ const routes = [
                 mode: {
                     lv: 1,
                     name: '测试2',
+                    key: "4"
                 },
                 // route level code-splitting
                 // this generates a separate chunk (about.[hash].js) for this route
@@ -97,6 +121,7 @@ const routes = [
                 mode: {
                     lv: 1,
                     name: '测试3',
+                    key: '5'
                 },
                 // route level code-splitting
                 // this generates a separate chunk (about.[hash].js) for this route
@@ -109,6 +134,7 @@ const routes = [
                 mode: {
                     lv: 1,
                     name: '测试4',
+                    key: "6"
                 },
                 // route level code-splitting
                 // this generates a separate chunk (about.[hash].js) for this route

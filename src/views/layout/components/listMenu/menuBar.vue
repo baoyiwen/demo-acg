@@ -12,18 +12,26 @@
                     active-text-color="#66ccff"
                     :router=true
             >
-                <template v-for="(router, index) in routes">
-                    <el-submenu :index="router.path" v-if="router.children" :key="index">
+                <template v-for="(router, index) in formatRoutes">
+                    <el-submenu :index="router.path" v-if="router.children" :key="router.mode.key">
                         <template slot="title">
                             <i class="el-icon-menu"></i>
-                            <span slot="title">{{router.name}}</span>
+                            <span slot="title">{{router.mode.name}}</span>
                         </template>
-                        <el-menu-item-group v-for="(child, index) in router.children" :key="index">
-                            <span slot="title" v-if="child.mode.group">{{child.mode.group}}</span>
-                            <el-menu-item :index="child.path">{{child.name}}</el-menu-item>
-                        </el-menu-item-group>
+                        <template>
+                            <el-menu-item-group v-for="(child, index) in router.children" :key="index">
+                                <span slot="title">{{child.groupName}}</span>
+                                <el-menu-item
+                                        :index="c.path"
+                                        v-for="(c, index) in child.children"
+                                        :key="c.mode.key"
+                                >
+                                    {{c.mode.name}}
+                                </el-menu-item>
+                            </el-menu-item-group>
+                        </template>
                     </el-submenu>
-                    <el-menu-item :index="router.path" v-else :key="index">
+                    <el-menu-item :index="router.path" v-else>
                         <i class="el-icon-setting"></i>
                         <span slot="title">{{router.mode.name}}</span>
                     </el-menu-item>
@@ -52,6 +60,46 @@
         },
         computed: {
             ...mapState(['routes']),
+            formatRoutes() {
+                const _this = this;
+                let routes = _this.routes,
+                    newRoutes = [];
+                routes.forEach((router, index) => {
+                    let newChilds = [];
+                    if (router.children) {
+                        // console.log(router);
+                        let temp = router.children;
+                        for (let i = 0; i < router.children.length; i++) {
+                            let test = {
+                                groupName: '',
+                                children: [],
+                            };
+                            if (temp.length) {
+                                for (let j = 0; j < temp.length; j++) {
+                                    if (temp[j].mode !== undefined) {
+                                        if (router.children[i].mode.group === temp[j].mode.group) {
+                                            test.groupName = temp[j].mode.groupName;
+                                            test.children.push(temp[j]);
+                                        }
+                                    }
+                                }
+                            }
+                            newChilds.push(test);
+                        }
+                        for (let i = 0; i < newChilds.length; i++) {
+                            for (let j = i + 1; j < newChilds.length; j++) {
+                                if (newChilds[i].groupName === newChilds[j].groupName) {
+                                    newChilds.splice(j, 1)
+                                    j--;
+                                }
+                            }
+                        }
+                        router.children = newChilds;
+                    }
+                    newRoutes.push(router)
+                });
+                return newRoutes;
+            },
         },
         mounted() {
             const _this = this;
@@ -63,10 +111,10 @@
 
         methods: {
             handleOpen(key, keyPath) {
-                console.log(key, keyPath);
+                // console.log(key, keyPath);
             },
             handleClose(key, keyPath) {
-                console.log(key, keyPath);
+                // console.log(key, keyPath);
             },
             telescopic() {
                 const _this = this;
@@ -108,6 +156,7 @@
         overflow: hidden;
         transition: .6s;
         background: #f2f2f2;
+
         .menu {
             position: absolute;
             overflow-x: hidden;
