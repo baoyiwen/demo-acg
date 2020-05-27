@@ -1,7 +1,7 @@
 <template>
     <div class="footer-main">
         <p>
-            <span>本网张只供学习交流使用,如有侵权发送邮件至511530203@qq.com</span>
+            <span>本网站只供学习交流使用,如有侵权发送邮件至511530203@qq.com</span>
             <span>编号: Byw000000001</span>
         </p>
     </div>

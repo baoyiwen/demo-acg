@@ -1,13 +1,12 @@
 <template>
-    <div class="home-main">
-        <p>Home</p>
-        <router-view />
+    <div class="nav_page">
+        导航页
     </div>
 </template>
 
 <script>
     export default {
-        name: "home"
+        name: "NavPage"
     }
 </script>
 

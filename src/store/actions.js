@@ -3,11 +3,15 @@
  * */
 import {routes} from "../router";
 import {
+    getCityList,
+} from '../api/index'
+import {
     GET_ROUTERS,
+    GET_CITY_INFO,
 } from "./mutation-type"
 
 export default {
-    // 获取路由信息
+    // 同步获取路由信息
     getRoutes({commit}) {
         let dataDutes = routes,
             tempRoutes = dataDutes[0].children,
@@ -15,17 +19,17 @@ export default {
         for (let i = 0; i < tempRoutes.length; i++) {
             let newChilds = [],
                 tempRoute = tempRoutes[i];
-            if (tempRoute.children !== undefined) {
-                let tempRouteChild = tempRoute.children;
-                for (let j = 0; j < tempRouteChild.length; j++) {
+            if (tempRoutes[i].children !== undefined) {
+                let tempRouteChild = tempRoutes[i].children;
+                for (let j = 0; j < tempRoutes[i].children.length; j++) {
                     let tempRouter = {
                             groupName: '',
                             children: [],
                         },
                         routerChild1 = tempRouteChild[j];
-                    for (let x = 0; x < tempRouteChild.length; x++) {
+                    for (let x = 0; x < tempRoutes[i].children.length; x++) {
                         let routerChild2 = tempRouteChild[x];
-                        if (routerChild1.meta.group === routerChild2.meta.group) {
+                        if (tempRoutes[i].children[j].meta.group === tempRoutes[i].children[x].meta.group) {
                             tempRouter.groupName = routerChild2.meta.groupName;
                             tempRouter.children.push(routerChild2);
                         }
@@ -48,4 +52,14 @@ export default {
         }
         commit(GET_ROUTERS, {newRoutes});
     },
+
+    // 异步发起获取城市列表信息
+    async getCityList({commit}) {
+        const data = await getCityList();
+        if (data.error_code === 0) {
+            const cityList = data.result;
+            console.log(cityList);
+            commit(GET_CITY_INFO, {cityList});
+        }
+    }
 }

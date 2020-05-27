@@ -2,7 +2,6 @@
     <div :class="isCollapse ? 'menu-main minWidth' : 'menu-main maxWidth'">
         <div class="menu">
             <el-menu
-                    default-active="/home"
                     :unique-opened=true
                     class="el-menu-vertical-demo"
                     @open="handleOpen"
@@ -20,7 +19,7 @@
                         </template>
                         <template>
                             <el-menu-item-group v-for="(child, index) in router.children" :key="index">
-                                <span slot="title">{{child.groupName}}</span>
+                                <span slot="title" v-if="child.groupName">{{child.groupName}}</span>
                                 <el-menu-item
                                         :index="c.path"
                                         v-for="(c, index) in child.children"
@@ -46,7 +45,6 @@
 
 <script>
     import {mapState, mapActions} from 'vuex'
-
     export default {
         name: "menuBar",
         data() {
@@ -62,17 +60,12 @@
         computed: {
             ...mapState(['routes']),
         },
-        created() {
-            this.getRouters();
-        },
         mounted() {
             const _this = this;
             window.onload = function () {
                 _this.onSizeWin();
             }
-           //  _this.testRoutes();
-            //
-            console.log(_this.routes);
+            _this.getRouters();
         },
 
         methods: {

@@ -82,7 +82,7 @@
             .right-nav {
                 overflow: auto;
                 margin-left: 20px;
-                height: calc(~"100% - 5px");
+                height: calc(~"100% - 0px");
                 background: #f2f2f2;
             }
         }
