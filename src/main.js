@@ -16,6 +16,8 @@ import {
   Select,
   Option,
   Button,
+  Table,
+  TableColumn, Tag,
 } from "element-ui";
 import 'element-ui/lib/theme-chalk/index.css';
 Vue.config.productionTip = false
@@ -33,6 +35,9 @@ Vue.component(Input.name, Input);
 Vue.component(Select.name, Select);
 Vue.component(Option.name, Option);
 Vue.component(Button.name, Button);
+Vue.component(Table.name, Table);
+Vue.component(TableColumn.name, TableColumn);
+Vue.component(Tag.name, Tag);
 
 
 new Vue({

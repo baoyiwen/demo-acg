@@ -11,7 +11,6 @@ export default {
         state.routes = newRoutes;
     },
     [GET_CITY_INFO] (state, {cityList}) {
-        console.log(cityList);
         state.cityList = cityList;
     }
 }

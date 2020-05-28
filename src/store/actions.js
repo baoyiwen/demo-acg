@@ -58,7 +58,6 @@ export default {
         const data = await getCityList();
         if (data.error_code === 0) {
             const cityList = data.result;
-            console.log(cityList);
             commit(GET_CITY_INFO, {cityList});
         }
     }
