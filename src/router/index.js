@@ -73,6 +73,33 @@ export const routes = [
                     }
                 ]
             },
+            {
+                path: '/photo',
+                name: 'photo',
+                meta: {
+                    lv: 1,
+                    name: '图片信息管理',
+                    key: "3"
+                },
+                // route level code-splitting
+                // this generates a separate chunk (about.[hash].js) for this route
+                // which is lazy-loaded when the route is visited.
+                component: () => import(/* webpackChunkName: "about" */ '@/views/layout/pages/Photo-Main/photo-main.vue'),
+                children: [
+                    {
+                        path: '/photoinfo',
+                        name: 'photoinfo',
+                        meta: {
+                            lv: 1,
+                            name: '图片信息查询',
+                            group: 1,
+                            // groupName: '第一组',
+                            key: '3-1'
+                        },
+                        component: () => import('@/views/layout/pages/Photo-Main/photo-info/photo-info.vue')
+                    }
+                ]
+            },
         ],
     },
     // {

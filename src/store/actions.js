@@ -8,7 +8,9 @@ import {
 import {
     GET_ROUTERS,
     GET_CITY_INFO,
+    SAVE_SETTING,
 } from "./mutation-type"
+import {LocalStorage} from "../utils/storage";
 
 export default {
     // 同步获取路由信息
@@ -52,7 +54,6 @@ export default {
         }
         commit(GET_ROUTERS, {newRoutes});
     },
-
     // 异步发起获取城市列表信息
     async getCityList({commit}) {
         const data = await getCityList();
@@ -60,5 +61,14 @@ export default {
             const cityList = data.result;
             commit(GET_CITY_INFO, {cityList});
         }
-    }
+    },
+    // 修改是否限制年龄
+    saveSETTING ({commit}, obj) {
+        commit(SAVE_SETTING, obj);
+    },
+    // 储存搜索历史
+    setSearchHistory ({commit}, obj) {
+
+    },
 }
+

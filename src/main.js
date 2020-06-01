@@ -3,6 +3,9 @@ import App from './App.vue'
 import './registerServiceWorker'
 import router from './router'
 import store from './store'
+import VueLazyload from "vue-lazyload";
+import loading from './svg/loading.svg'
+import infiniteScroll from 'vue-infinite-scroll'
 import {
   Menu,
   Submenu,
@@ -17,10 +20,20 @@ import {
   Option,
   Button,
   Table,
-  TableColumn, Tag,
+  TableColumn,
+  Tag,
+  Row,
+  Col,
+  Image,
 } from "element-ui";
 import 'element-ui/lib/theme-chalk/index.css';
-Vue.config.productionTip = false
+import waterfall from 'vue-waterfall2'
+Vue.config.productionTip = false;
+Vue.use(waterfall);
+Vue.use(infiniteScroll);
+Vue.use(VueLazyload, {
+  loading: loading,
+});
 // Vue.use(ElementUI);
 // 引入导航菜单组件
 Vue.component(Menu.name, Menu);
@@ -38,6 +51,9 @@ Vue.component(Button.name, Button);
 Vue.component(Table.name, Table);
 Vue.component(TableColumn.name, TableColumn);
 Vue.component(Tag.name, Tag);
+Vue.component(Row.name, Row);
+Vue.component(Col.name, Col);
+Vue.component(Image.name, Image);
 
 
 new Vue({
