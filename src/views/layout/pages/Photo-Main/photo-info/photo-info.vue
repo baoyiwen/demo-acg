@@ -30,6 +30,7 @@
                                     v-lazy="rank.images[0].m"
                                     :class="{censored: isDisplay(rank.age_limit)}"
                                     :style="{width: `${itemW}`, height: `${Math.round(itemW * rank.height / rank.width)}px`}"
+                                    @error="errorImg(rank.images[0])"
                             />
                             <a href="javascript:;">
                                 <span>{{rank.author.name}}</span>
@@ -152,8 +153,13 @@
                     return false;
                 }
             },
+            errorImg (item) {
+                item.m = require('../../../../../assets/default.jpg');
+            },
         },
-        watch: {}
+        watch: {
+
+        },
     }
 </script>
 
