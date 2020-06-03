@@ -6,6 +6,7 @@ import store from './store'
 import VueLazyload from "vue-lazyload";
 import loading from './svg/loading.svg'
 import infiniteScroll from 'vue-infinite-scroll'
+import errorImg from './assets/default.jpg'
 import {
   Menu,
   Submenu,
@@ -25,6 +26,7 @@ import {
   Row,
   Col,
   Image,
+  Dialog,
 } from "element-ui";
 import 'element-ui/lib/theme-chalk/index.css';
 import waterfall from 'vue-waterfall2'
@@ -33,6 +35,8 @@ Vue.use(waterfall);
 Vue.use(infiniteScroll);
 Vue.use(VueLazyload, {
   loading: loading,
+  error: errorImg,
+  attempt: 3
 });
 // Vue.use(ElementUI);
 // 引入导航菜单组件
@@ -54,6 +58,8 @@ Vue.component(Tag.name, Tag);
 Vue.component(Row.name, Row);
 Vue.component(Col.name, Col);
 Vue.component(Image.name, Image);
+Vue.component(Dialog.name, Dialog);
+Vue.component(Tag.name, Tag);
 
 
 new Vue({

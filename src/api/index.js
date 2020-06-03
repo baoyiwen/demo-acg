@@ -207,11 +207,11 @@ export const api = {
      * @param {Number} per_page 每页数量
      * @param {Number} page 页数
      * */
-    async getLatest (offset = 0, per_page = 60, page = 1) {
+    async getLatest (offset = 0, per_page = 40, page = 1) {
         let res = await getLatestByDay({
             type: 'latest',
             offset,
-            per_page,
+            per_page: per_page > 40 ? per_page : 40,
             page,
         });
 
@@ -514,6 +514,9 @@ export const api = {
 
         return {status: 0, data: tags};
     },
+    /**
+     * 测试接口 v1
+     * */
     async getPhotoHome(data) {
         let res = await getHomePhoto(data);
         res.response.forEach(val => {

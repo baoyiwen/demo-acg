@@ -6,61 +6,91 @@
         <div class="photo-query">
             <el-form :inline="true" class="demo-form-inline"
                      size="small ">
-                <el-form-item label="关键字搜索:">
-                    <el-input placeholder="请输入关键字"></el-input>
-                </el-form-item>
+                <!--                <el-form-item label="关键字搜索:">-->
+                <!--                    <el-input placeholder="请输入关键字"></el-input>-->
+                <!--                </el-form-item>-->
                 <el-form-item>
-                    <el-button type="primary">查询</el-button>
+                    <el-button type="primary" @click="refresh">刷新</el-button>
                 </el-form-item>
             </el-form>
         </div>
         <!--         @scroll="scroll"-->
-        <div class="image-list clearFix" id="image-list"  @scroll="scroll">
-            <waterfall
-                    :col="rowNum"
-                    :data="rankList"
-                    class="waterfall wrapper"
-                    id="wrapper"
+        <div class="image-list clearFix" id="image-list" @scroll="scroll">
+            <pic-display
+                    :rank-list="rankList"
+                    @scrollFu="scroll"
+                    @getItemFn="getItemInfo"
+
             >
-                <template>
-                    <a class="warp-a" href="javascript:;" v-for="(rank, index) in rankList" :key="index">
-                        <div class="image-item" :style="{width: `${itemW}px`}">
-                            <img
-                                    class="img"
-                                    v-lazy="rank.images[0].m"
-                                    :class="{censored: isDisplay(rank.age_limit)}"
-                                    :style="{width: `${itemW}`, height: `${Math.round(itemW * rank.height / rank.width)}px`}"
-                                    @error="errorImg(rank.images[0])"
-                            />
-                            <a href="javascript:;">
-                                <span>{{rank.author.name}}</span>
-                                <img v-lazy="rank.author.avatar" alt="">
-                            </a>
-                            <div class="imgs" v-if="rank.images.length > 1">
-                                <span>{{rank.images.length}}</span>
-                            </div>
-                        </div>
-                    </a>
-                </template>
-            </waterfall>
-            <div class="loading" id="loading" style="height: 100px"></div>
+
+            </pic-display>
         </div>
+        <el-dialog
+                title="图片详情"
+                :visible.sync="showInfo"
+                class="dialog-img"
+                width="60%"
+        >
+            <div class="dialog-wrap"  :class="{shrink: isShrink}" id="dialog-wrap" v-if="artWork !== null">
+                <!-- :style="{height: `${artWork.height/15}px`, width: `${artWork.width/15}px`}" -->
+                <div class="art-info">
+                    <div class="user-info">
+                        <img v-lazy="artWork.author.avatar" alt="">
+                        <span>{{artWork.author.name}}</span>
+                    </div>
+                    <div class="img-name">
+                        <p><span style="margin-right: 10px">图片名:</span>{{artWork.title}}</p>
+                    </div>
+                    <div class="tags">
+                        <span style="margin-right: 10px">标签:</span>
+                        <el-tag
+                          size="small"
+                          v-for="(tag, index) in artWork.tags"
+                          :key="index"
+                        >
+                            {{tag.translated_name || tag.name}}
+                        </el-tag>
+                    </div>
+                </div>
+                <div class="img-box"
+                     v-for="(item, index) in artWork.images"
+                     :key="index">
+                    <img
+                         v-lazy="item.l"
+                         class="image-item"
+                         alt=""
+                         style=""
+                         :class="{censored: isDisplayV2(artWork.x_restrict)}"
+                    />
+                </div>
+                <div class="arrow-wrap" v-if="isShrink" @click="showAllImg">
+                    <div class="arrow"></div>
+                </div>
+            </div>
+        </el-dialog>
     </div>
 </template>
 
 <script>
+    import picDisplay from '../../../../../components/PicDisplay/pic-display'
     import {api} from '../../../../../api/index';
     import dayjs from 'dayjs';
-    import {Loading} from 'element-ui';
+    import {
+        Loading,
+        Message,
+    } from 'element-ui';
     import {mapState} from 'vuex'
     import {_debounce} from '../../../../../public/index'
+
     export default {
         name: "photo-info",
         data() {
             return {
                 currentDate: dayjs(new Date()).format('YYYY-MM-DD'),
                 rankList: [],
-                totalWidth: 800, // 显示视口总宽度
+                dialogW: 0, //展示弹框的宽
+                dialogH: 0, // 展示弹框的高
+                totalWidth: 0, // 显示视口总宽度
                 totalHeight: 0, // 显示视口总高度
                 rowNum: 10, // 显示行数
                 colNum: 4, // 显示列数
@@ -68,18 +98,25 @@
                 itemW: 0, // 宽度
                 page: 1, // 页数
                 busy: false, // 是否正在加载过程中
+                showInfo: false, // 是否显示详细信息
+                artWork: null, // 作品详情
+                isShrink: false,// 是否隐藏多余的数据
             }
         },
-        components: {},
+        components: {
+            picDisplay,
+        },
         computed: {
             ...mapState(['SETTING']),
         },
         mounted() {
             const _this = this;
+            window.onload = function () {
+                _this.getW();
+                //_this.getImageItemWH();
+            };
             _this.offset = 1;
-            _this.getImageItemWH();
             _this._getLatest_();
-            console.log(_this.SETTING);
         },
         methods: {
             async _getLatest_() {
@@ -98,11 +135,21 @@
                         background: `rgba(240, 240, 240, 0.5)`
                     });
                 }
-                const rank = await api.getLatest(0, 60, _this.page);
+                const rank = await api.getLatest(0, 40, _this.page);
                 if (rank.status === 0) {
+                    Message({
+                        type: 'success',
+                        showClose: true,
+                        message: '访问成功!',
+                    });
                     _this.rankList = _this.rankList.concat(rank.data);
+                } else {
+                    Message({
+                        type: 'error',
+                        showClose: true,
+                        message: rank.msg,
+                    });
                 }
-                console.log(_this.rankList);
                 _this.$nextTick(() => {
                     if (load !== null) {
                         load.close();
@@ -110,6 +157,28 @@
                         loadT.close();
                     }
                 });
+                console.log(111)
+            },
+            async _getArtWork_(id) {
+                const _this = this;
+                _this.artWork = null;
+                let artWorkList = await api.getArtWork(id);
+                if (artWorkList.status === 0) {
+                    Message({
+                        type: 'success',
+                        showClose: true,
+                        message: '访问成功!',
+                    });
+                    _this.artWork = artWorkList.data;
+                    _this.isShrinkShow(_this.artWork.images.length);
+                    console.log(_this.artWork);
+                } else {
+                    Message({
+                        type: 'error',
+                        showClose: true,
+                        message: artWorkList.msg,
+                    });
+                }
             },
             getImageItemWH() {
                 const _this = this;
@@ -117,44 +186,89 @@
                 _this.totalHeight = document.getElementById('image-list').clientHeight;
                 _this.rowNum = Math.ceil(_this.totalWidth / _this.narrow);
                 _this.itemW = Math.round(_this.totalWidth / _this.rowNum);
+                window.onresize = function () {
+                    _this.totalWidth = document.getElementById('image-list').clientWidth;
+                    _this.totalHeight = document.getElementById('image-list').clientHeight;
+                    _this.rowNum = Math.ceil(_this.totalWidth / _this.narrow);
+                    _this.itemW = Math.round(_this.totalWidth / _this.rowNum);
+                };
             },
             /**
              * 滚动滚动条获取新的数据组
              * */
             scroll() {
-                const _this = this,
-                    scrollDiv = document.getElementById('image-list'),
-                    scrollHeight = scrollDiv.scrollHeight, // 文档总高度
-                    viewHight = scrollDiv.offsetHeight, // 视口高度
-                    scrollTop = scrollDiv.scrollTop, // 滚动条滚动距离
-                    borderNum = 4; // 容器标签上下边框总宽度\
-                if ((scrollHeight + borderNum) === (viewHight + scrollTop)) {
-                    let timeout = null;
-                    if (timeout !== null) {
-                        clearTimeout(timeout);
-                    }
-                    timeout = setTimeout(() => {
-                        _this.page += 1;
-                        _this._getLatest_();
-                    }, 200);
-                }
-
+                const _this = this;
+                _this.page += 1;
+                _this._getLatest_();
             },
             /**
              * 判断是否显示当前内容
              * */
-            isDisplay (val) {
+            isDisplayV2(val) {
                 const _this = this;
-                if (val === 'r18') {
+                if (val === 1) {
                     return _this.SETTING.r18 ? false : true;
-                } else if (val === 'r18-g') {
+                } else if (val === 2) {
                     return _this.SETTING.r18g ? false : true;
                 } else {
                     return false;
                 }
             },
-            errorImg (item) {
-                item.m = require('../../../../../assets/default.jpg');
+            getItemInfo(item) {
+                const _this = this;
+                _this.showInfo = true;
+                _this._getArtWork_(item.id);
+            },
+            /**
+             * 点击刷新页面
+             * */
+            refresh() {
+                const _this = this;
+                _this.rankList = [];
+                _this.page = 1;
+                _this._getLatest_();
+            },
+            getW() {
+                const _this = this;
+                _this.dialogW = _this.client().width;
+                _this.dialogH = _this.client().height;
+                window.onresize = function () {
+                    _this.dialogW = _this.client().width;
+                    _this.dialogH = _this.client().height;
+                    // console.log(_this.dialogW, _this.dialogH);
+                };
+                console.log(_this.dialogW, _this.dialogH);
+            },
+            //获取浏览器可视区域的宽高  (兼容写法)
+            client() {
+                if (window.innerHeight !== undefined) {
+                    return {
+                        "width": window.innerWidth,
+                        "height": window.innerHeight
+                    }
+                } else if (document.compatMode === "CSS1Compat") {
+                    return {
+                        "width": document.documentElement.clientWidth,
+                        "height": document.documentElement.clientHeight
+                    }
+                } else {
+                    return {
+                        "width": document.body.clientWidth,
+                        "height": document.body.clientHeight
+                    }
+                }
+            },
+            isShrinkShow (item) {
+                const _this = this;
+                if (item && item >= 3) {
+                    _this.isShrink = true;
+                } else {
+                    _this.isShrink = false;
+                }
+            },
+            showAllImg () {
+                const _this = this;
+                _this.isShrink = false;
             },
         },
         watch: {
@@ -196,66 +310,92 @@
             border: 2px solid #66ccff;
             padding: 12px;
             overflow-y: auto;
-            .waterfall {
-                overflow-x: hidden !important;
+        }
+
+        .dialog-wrap {
+            position: relative;
+            width: 100%;
+            text-align: center;
+            &.shrink {
+                max-height: 1000px;
+                overflow: hidden;
             }
-            .warp-a {
+            .img-box {
+                display: inline-block;
+                width: 100%;
+                overflow: hidden;
+                max-height: 800px;
+                min-height: 300px;
+                margin-top: 20px;
                 .image-item {
-                    position: relative;
-                    & > a {
-                        display: block;
-                        position: absolute;
-                        bottom: 0;
-                        height: 25px;
-                        width: 100%;
-                        background-color: rgba(52, 52, 52, .5);
-                        line-height: 25px;
-                        overflow: hidden;
-                        &>span {
-                            display: inline-block;
-                            width: calc(~'100% - 30px');
-                            height: calc(~'100% - 4px');
-                            font-size: 10px;
-                            color: #f0f0f0;
-                            vertical-align: middle;
-                            overflow: hidden;
-                            white-space: nowrap;
-                            text-overflow: ellipsis;
-                        }
-                        &>img {
-                            width: 20px;
-                            height: 20px;
-                            border-radius: 100%;
-                            vertical-align: middle;
-                        }
+                    object-fit: contain;
+                    width: 100%;
+                    height: 100%;
+                    max-height: 800px;
+                    min-height: 300px;
+                }
+            }
+            .arrow-wrap {
+                position: absolute;
+                bottom: 0;
+                width: 100%;
+                filter: blur(4px);
+                background-color: rgba(52, 52, 52, 1);
+                cursor: pointer;
+                .arrow {
+                    display: inline-block;
+                    width: 60px;
+                    height: 60px;
+                    background-image: url("../../../../../svg/dropdown.svg");
+                    background-repeat: no-repeat;
+                    background-size:100% 100%;
+                }
+            }
+
+            .art-info {
+                width: 100%;
+                height: 120px;
+                overflow: hidden;
+                text-align: left;
+                padding: 10px 36px;
+                font-size: 16px;
+                .user-info {
+                    height: 40px;
+                    width: 100%;
+                    overflow: hidden;
+                    margin-bottom: 10px;
+                    cursor: pointer;
+                    &>img {
+                        width: 36px;
+                        height: 36px;
+                        border-radius: 100%;
+                        margin-right: 10px;
+                        vertical-align: middle;
                     }
-                    .imgs {
-                        position: absolute;
-                        top: 5px;
-                        right: 5px;
-                        width: 20px;
-                        height: 20px;
-                        //background: #66ccff;
-                        background-image: url('../../../../../svg/layer.svg');
-                        background-size: 100% 100%;
-                        background-repeat: no-repeat;
-                        background-color: rgba(52, 52, 52, .4);
-                        line-height: 20px;
-                        text-align: center;
-                        &>span {
-                            color: #00ff00;
-                            font-size: 8px;
-                        }
+                    &>span {
+                        vertical-align: middle;
                     }
                 }
-                .censored {
-                    filter: blur(40px);
-                    position: relative;
+                .img-name {
+                    height: 25px;
+                    width: 100%;
+                    margin-bottom: 10px;
+                    overflow: hidden;
+                }
+                .tags {
+                    width: 100%;
+                    margin-bottom: 10px;
+                    overflow: hidden;
+                    cursor: pointer;
                 }
             }
         }
     }
 
+    .censored {
+        filter: blur(40px);
+        position: relative;
+    }
     .el-form-item .el-form-item__content .el-select .el-input__inner {
         padding-right: 0 !important;
     }

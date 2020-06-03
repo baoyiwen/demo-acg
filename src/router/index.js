@@ -91,7 +91,7 @@ export const routes = [
                         name: 'photoinfo',
                         meta: {
                             lv: 1,
-                            name: '图片信息查询',
+                            name: '查看Pixiv最新更新',
                             group: 1,
                             // groupName: '第一组',
                             key: '3-1'
