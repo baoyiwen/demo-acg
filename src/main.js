@@ -27,6 +27,8 @@ import {
   Col,
   Image,
   Dialog,
+  Carousel,
+  CarouselItem,
 } from "element-ui";
 import 'element-ui/lib/theme-chalk/index.css';
 import waterfall from 'vue-waterfall2'
@@ -60,8 +62,8 @@ Vue.component(Col.name, Col);
 Vue.component(Image.name, Image);
 Vue.component(Dialog.name, Dialog);
 Vue.component(Tag.name, Tag);
-
-
+Vue.component(Carousel.name, Carousel);
+Vue.component(CarouselItem.name, CarouselItem);
 new Vue({
   router,
   store,

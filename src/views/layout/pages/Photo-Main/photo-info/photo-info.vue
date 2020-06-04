@@ -17,62 +17,70 @@
         <!--         @scroll="scroll"-->
         <div class="image-list clearFix" id="image-list" @scroll="scroll">
             <pic-display
-                    :rank-list="rankList"
-                    @scrollFu="scroll"
-                    @getItemFn="getItemInfo"
-
+              :rank-list="rankList"
+              @scrollFu="scroll"
+              @getItemFn="getItemInfo"
             >
-
             </pic-display>
         </div>
-        <el-dialog
-                title="图片详情"
-                :visible.sync="showInfo"
-                class="dialog-img"
-                width="60%"
+        <imageDialog
+            v-if="artWork !== null"
+            :show-info="showInfo"
+            :art-work="artWork"
+            :is-shrink="isShrink"
         >
-            <div class="dialog-wrap"  :class="{shrink: isShrink}" id="dialog-wrap" v-if="artWork !== null">
-                <!-- :style="{height: `${artWork.height/15}px`, width: `${artWork.width/15}px`}" -->
-                <div class="art-info">
-                    <div class="user-info">
-                        <img v-lazy="artWork.author.avatar" alt="">
-                        <span>{{artWork.author.name}}</span>
-                    </div>
-                    <div class="img-name">
-                        <p><span style="margin-right: 10px">图片名:</span>{{artWork.title}}</p>
-                    </div>
-                    <div class="tags">
-                        <span style="margin-right: 10px">标签:</span>
-                        <el-tag
-                          size="small"
-                          v-for="(tag, index) in artWork.tags"
-                          :key="index"
-                        >
-                            {{tag.translated_name || tag.name}}
-                        </el-tag>
-                    </div>
-                </div>
-                <div class="img-box"
-                     v-for="(item, index) in artWork.images"
-                     :key="index">
-                    <img
-                         v-lazy="item.l"
-                         class="image-item"
-                         alt=""
-                         style=""
-                         :class="{censored: isDisplayV2(artWork.x_restrict)}"
-                    />
-                </div>
-                <div class="arrow-wrap" v-if="isShrink" @click="showAllImg">
-                    <div class="arrow"></div>
-                </div>
-            </div>
-        </el-dialog>
+
+        </imageDialog>
+
+<!--        <el-dialog-->
+<!--                title="图片详情"-->
+<!--                :visible.sync="showInfo"-->
+<!--                class="dialog-img"-->
+<!--                width="60%"-->
+<!--        >-->
+<!--            <div class="dialog-wrap"  :class="{shrink: isShrink}" id="dialog-wrap" v-if="artWork !== null">-->
+<!--                &lt;!&ndash; :style="{height: `${artWork.height/15}px`, width: `${artWork.width/15}px`}" &ndash;&gt;-->
+<!--                <div class="art-info">-->
+<!--                    <div class="user-info">-->
+<!--                        <img v-lazy="artWork.author.avatar" alt="">-->
+<!--                        <span>{{artWork.author.name}}</span>-->
+<!--                    </div>-->
+<!--                    <div class="img-name">-->
+<!--                        <p><span style="margin-right: 10px">图片名:</span>{{artWork.title}}</p>-->
+<!--                    </div>-->
+<!--                    <div class="tags">-->
+<!--                        <span style="margin-right: 10px">标签:</span>-->
+<!--                        <el-tag-->
+<!--                          size="small"-->
+<!--                          v-for="(tag, index) in artWork.tags"-->
+<!--                          :key="index"-->
+<!--                        >-->
+<!--                            {{tag.translated_name || tag.name}}-->
+<!--                        </el-tag>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--                <div class="img-box"-->
+<!--                     v-for="(item, index) in artWork.images"-->
+<!--                     :key="index">-->
+<!--                    <img-->
+<!--                         v-lazy="item.l"-->
+<!--                         class="image-item"-->
+<!--                         alt=""-->
+<!--                         style=""-->
+<!--                         :class="{censored: isDisplayV2(artWork.x_restrict)}"-->
+<!--                    />-->
+<!--                </div>-->
+<!--                <div class="arrow-wrap" v-if="isShrink" @click="showAllImg">-->
+<!--                    <div class="arrow"></div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </el-dialog>-->
     </div>
 </template>
 
 <script>
     import picDisplay from '../../../../../components/PicDisplay/pic-display'
+    import imageDialog from '../../../../../components/ImageDialog/image-dialog'
     import {api} from '../../../../../api/index';
     import dayjs from 'dayjs';
     import {
@@ -81,7 +89,6 @@
     } from 'element-ui';
     import {mapState} from 'vuex'
     import {_debounce} from '../../../../../public/index'
-
     export default {
         name: "photo-info",
         data() {
@@ -97,7 +104,7 @@
                 narrow: 120, // 计算行列参数
                 itemW: 0, // 宽度
                 page: 1, // 页数
-                busy: false, // 是否正在加载过程中
+                busy: true, // 是否正在加载过程中
                 showInfo: false, // 是否显示详细信息
                 artWork: null, // 作品详情
                 isShrink: false,// 是否隐藏多余的数据
@@ -105,6 +112,7 @@
         },
         components: {
             picDisplay,
+            imageDialog,
         },
         computed: {
             ...mapState(['SETTING']),
@@ -157,7 +165,9 @@
                         loadT.close();
                     }
                 });
-                console.log(111)
+                setTimeout(() => {
+                    _this.busy = true;
+                }, 2000);
             },
             async _getArtWork_(id) {
                 const _this = this;
@@ -171,7 +181,7 @@
                     });
                     _this.artWork = artWorkList.data;
                     _this.isShrinkShow(_this.artWork.images.length);
-                    console.log(_this.artWork);
+                    console.log( _this.artWork);
                 } else {
                     Message({
                         type: 'error',
@@ -198,8 +208,17 @@
              * */
             scroll() {
                 const _this = this;
-                _this.page += 1;
-                _this._getLatest_();
+                if (_this.busy) {
+                    _this.busy = false;
+                    _this.page += 1;
+                    _this._getLatest_();
+                } else {
+                    Message({
+                        type: 'warning',
+                        showClose: true,
+                        message: '您的访问速度过于频繁,请稍后继续访问......',
+                    });
+                }
             },
             /**
              * 判断是否显示当前内容
@@ -237,7 +256,6 @@
                     _this.dialogH = _this.client().height;
                     // console.log(_this.dialogW, _this.dialogH);
                 };
-                console.log(_this.dialogW, _this.dialogH);
             },
             //获取浏览器可视区域的宽高  (兼容写法)
             client() {

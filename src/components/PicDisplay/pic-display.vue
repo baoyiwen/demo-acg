@@ -1,5 +1,5 @@
 <template>
-    <div class="picdis clearFix" id="picdis"  @scroll="getScroll">
+    <div class="picdis clearFix" id="picdis" @scroll="getScroll">
         <waterfall
                 :col="rowNum"
                 :data="rankList"
@@ -8,16 +8,18 @@
         >
             <template>
                 <a class="warp-a" href="javascript:;" v-for="(rank, index) in rankList" :key="index">
-                    <div class="image-item" :style="{width: `${itemW}px`, height: `${Math.round(itemW * rank.height / rank.width)}px`}" @click.stop="getItemInfo(rank)">
+                    <div class="image-item"
+                         :style="{width: `${itemW}px`, height: `${Math.round(itemW * rank.height / rank.width)}px`}"
+                         @click.stop="getItemInfo(rank)">
                         <img
                                 class="img"
                                 v-lazy="rank.images[0].m"
-                                :class="{censored: isDisplay(rank.age_limit)}"
-                                style="width: 100%; height: 100%"
+                                :class="{censored: isDisplay(rank.age_limit, rank.tags)}"
+                                style="width: 100%; height: 100%;object-fit: contain;"
                         />
                         <a href="javascript:;">
                             <span>{{rank.author.name}}</span>
-                            <img v-lazy="rank.author.avatar" alt="">
+                            <img v-lazy="rank.author.avatar" alt="" style="object-fit: contain;">
                         </a>
                         <div class="imgs" v-if="rank.images.length > 1">
                             <span>{{rank.images.length}}</span>
@@ -34,9 +36,10 @@
     import dayjs from 'dayjs';
     import {Loading} from 'element-ui';
     import {mapState} from 'vuex'
+
     export default {
         name: "pic-display",
-        data () {
+        data() {
             return {
                 totalWidth: 800, // 显示视口总宽度
                 totalHeight: 0, // 显示视口总高度
@@ -47,7 +50,7 @@
                 errorImg: 'this.src="' + require('./img/default.jpg') + '"', //图片加载失败默认图片
             }
         },
-        props:{
+        props: {
             rankList: {
                 type: Array,
                 required: true
@@ -56,12 +59,12 @@
         computed: {
             ...mapState(['SETTING']),
         },
-        mounted () {
+        mounted() {
             const _this = this;
             _this.getImageItemWH();
         },
         methods: {
-            getScroll () {
+            getScroll() {
                 const _this = this,
                     scrollDiv = document.getElementById('picdis'),
                     scrollHeight = scrollDiv.scrollHeight, // 文档总高度
@@ -78,7 +81,7 @@
                     }, 200);
                 }
             },
-            getItemInfo (item) {
+            getItemInfo(item) {
                 this.$emit('getItemFn', item);
             },
             getImageItemWH() {
@@ -93,19 +96,25 @@
                     _this.rowNum = Math.ceil(_this.totalWidth / _this.narrow);
                     _this.itemW = Math.round(_this.totalWidth / _this.rowNum);
                 };
-
-                console.log(_this.totalWidth);
             },
             /**
              * 判断是否显示当前内容
              * */
-            isDisplay (val) {
+            isDisplay(val, item) {
+                console.log(val);
                 const _this = this;
                 if (val === 'r18') {
                     return _this.SETTING.r18 ? false : true;
                 } else if (val === 'r18-g') {
                     return _this.SETTING.r18g ? false : true;
                 } else {
+                    for (let i = 0; i < item.length; i++) {
+                        if (item[i].name === 'R18' || item[i].name === 'R-18') {
+                            return _this.SETTING.r18 ? false : true;
+                        } else if (item[i].name === 'R-18G' || item[i].name === 'r18g') {
+                            return _this.SETTING.r18g ? false : true;
+                        }
+                    }
                     return false;
                 }
             },
@@ -122,12 +131,15 @@
         border: 2px solid #66ccff;
         padding: 12px;
         overflow-y: auto;
+
         .waterfall {
             overflow-x: hidden !important;
         }
+
         .warp-a {
             .image-item {
                 position: relative;
+
                 & > a {
                     display: block;
                     position: absolute;
@@ -137,7 +149,8 @@
                     background-color: rgba(52, 52, 52, .5);
                     line-height: 25px;
                     overflow: hidden;
-                    &>span {
+
+                    & > span {
                         display: inline-block;
                         width: calc(~'100% - 30px');
                         height: calc(~'100% - 4px');
@@ -148,13 +161,15 @@
                         white-space: nowrap;
                         text-overflow: ellipsis;
                     }
-                    &>img {
+
+                    & > img {
                         width: 20px;
                         height: 20px;
                         border-radius: 100%;
                         vertical-align: middle;
                     }
                 }
+
                 .imgs {
                     position: absolute;
                     top: 5px;
@@ -168,12 +183,14 @@
                     background-color: rgba(52, 52, 52, .4);
                     line-height: 20px;
                     text-align: center;
-                    &>span {
+
+                    & > span {
                         color: #00ff00;
                         font-size: 8px;
                     }
                 }
             }
+
             .censored {
                 filter: blur(40px);
                 position: relative;
