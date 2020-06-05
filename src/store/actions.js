@@ -9,6 +9,7 @@ import {
     GET_ROUTERS,
     GET_CITY_INFO,
     SAVE_SETTING,
+    SET_SEARCH_HISTORY,
 } from "./mutation-type"
 import {LocalStorage} from "../utils/storage";
 
@@ -68,7 +69,7 @@ export default {
     },
     // 储存搜索历史
     setSearchHistory ({commit}, obj) {
-
+        commit(SET_SEARCH_HISTORY, obj)
     },
 }
 

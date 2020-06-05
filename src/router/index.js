@@ -97,6 +97,18 @@ export const routes = [
                             key: '3-1'
                         },
                         component: () => import('@/views/layout/pages/Photo-Main/photo-info/photo-info.vue')
+                    },
+                    {
+                        path: '/photosearch',
+                        name: 'photosearch',
+                        meta: {
+                            lv: 1,
+                            name: '关键字搜索图片',
+                            group: 1,
+                            // groupName: '第一组',
+                            key: '3-2'
+                        },
+                        component: () => import('@/views/layout/pages/Photo-Main/photo-search/photo-search.vue')
                     }
                 ]
             },

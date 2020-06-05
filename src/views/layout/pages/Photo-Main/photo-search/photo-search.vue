@@ -6,19 +6,36 @@
         <div class="photo-query">
             <el-form :inline="true" class="demo-form-inline"
                      size="small ">
-                <!--                <el-form-item label="关键字搜索:">-->
-                <!--                    <el-input placeholder="请输入关键字"></el-input>-->
-                <!--                </el-form-item>-->
+                <el-form-item label="关键字搜索:">
+                    <el-select
+                        v-model="keyWords"
+                        multiple
+                        filterable
+                        allow-create
+                        default-first-option
+                        :collapse-tags="true"
+                        placeholder="请输入关键字"
+                    >
+                        <el-option
+                                v-for="(item, index) in searchHistory"
+                                :key="index"
+                                :value="item"
+                        >
+                        </el-option>
+                    </el-select>
+                </el-form-item>
                 <el-form-item>
-                    <el-button type="primary" @click="refresh">刷新</el-button>
+                    <el-button type="primary" icon="el-icon-search" @click="getSearchByKeyWord(true)">搜索</el-button>
+                </el-form-item>
+                <el-form-item>
+                    <el-button type="text" @click="clearhistory"  icon="el-icon-delete">清空历史</el-button>
                 </el-form-item>
             </el-form>
         </div>
         <!--         @scroll="scroll"-->
         <div class="image-list clearFix" id="image-list" @scroll="scroll">
             <pic-display
-              :rank-list="rankList"
-              :is-text="isText"
+              :rank-list="searchList"
               @scrollFu="scroll"
               @getItemFn="getItemInfo"
             >
@@ -31,7 +48,6 @@
             :is-shrink="isShrink"
             :is-show-down-load="true"
         >
-
         </imageDialog>
     </div>
 </template>
@@ -45,18 +61,17 @@
         Loading,
         Message,
     } from 'element-ui';
-    import {mapState} from 'vuex'
+    import {mapState, mapActions} from 'vuex'
     import {_debounce} from '../../../../../public/index'
     export default {
         name: "photo-info",
         data() {
             return {
-                currentDate: dayjs(new Date()).format('YYYY-MM-DD'),
-                rankList: [],
-                dialogW: 0, //展示弹框的宽
-                dialogH: 0, // 展示弹框的高
+                searchList: [],
                 totalWidth: 0, // 显示视口总宽度
                 totalHeight: 0, // 显示视口总高度
+                dialogW: 0, //展示弹框的宽
+                dialogH: 0, // 展示弹框的高
                 rowNum: 10, // 显示行数
                 colNum: 4, // 显示列数
                 narrow: 120, // 计算行列参数
@@ -66,7 +81,9 @@
                 showInfo: false, // 是否显示详细信息
                 artWork: null, // 作品详情
                 isShrink: false,// 是否隐藏多余的数据
-                isText: false, // 是否显示无图提示
+                keyWords: [],// 关键字
+                searchKeyWord: '', // 搜索方法使用的keyWord
+                options: [],
             }
         },
         components: {
@@ -74,23 +91,23 @@
             imageDialog,
         },
         computed: {
-            ...mapState(['SETTING']),
+            ...mapState(['SETTING', 'searchHistory']),
         },
         mounted() {
             const _this = this;
+            _this.offset = 1;
             window.onload = function () {
                 _this.getW();
-                //_this.getImageItemWH();
             };
-            _this.offset = 1;
-            _this._getLatest_();
+            _this.getSearchByKeyWord();
         },
         methods: {
-            async _getLatest_() {
+            ...mapActions(['setSearchHistory']),
+            async _getSearchByKeyWord_(keyWord) {
                 const _this = this;
                 let load = null;
                 let loadT = null;
-                if (!_this.rankList.length) {
+                if (!_this.searchList.length) {
                     load = Loading.service({
                         target: document.getElementById('image-list'),
                         text: '正在全力加载中,请稍等...'
@@ -102,22 +119,22 @@
                         background: `rgba(240, 240, 240, 0.5)`
                     });
                 }
-                const rank = await api.getLatest(0, 50, _this.page);
-                if (rank.status === 0) {
+                const search = await api.getSearch(keyWord, _this.page);
+                if (search.status === 0) {
                     Message({
                         type: 'success',
                         showClose: true,
                         message: '访问成功!',
                     });
-                    if (rank.data.length) {
+                    if (search.data.length) {
                         _this.isText = true;
                     }
-                    _this.rankList = _this.rankList.concat(rank.data);
+                    _this.searchList = _this.searchList.concat(search.data);
                 } else {
                     Message({
                         type: 'error',
                         showClose: true,
-                        message: rank.msg,
+                        message: search.msg,
                     });
                 }
                 _this.$nextTick(() => {
@@ -151,6 +168,26 @@
                     });
                 }
             },
+            /**
+             * 点击查询方法
+             * */
+            getSearchByKeyWord (item) {
+                const _this = this;
+                if (item) {
+                    _this.searchList = [];
+                    _this.page = 1;
+                }
+                let keyWordList = _this.keyWords.filter(item => {
+                    return  item && item.trim();
+                }),
+                    word = [];
+                keyWordList.forEach(val => {
+                    word.push(val.replace(/\s*/g,""));
+                     _this.setSearchHistory(val.replace(/\s*/g,""));
+                 });
+                let keyWords = word.length > 0 ? word.join('  ') : '制服';
+                _this._getSearchByKeyWord_(keyWords);
+            },
             getImageItemWH() {
                 const _this = this;
                 _this.totalWidth = document.getElementById('image-list').clientWidth;
@@ -172,7 +209,7 @@
                 if (_this.busy) {
                     _this.busy = false;
                     _this.page += 1;
-                    _this._getLatest_();
+                    _this.getSearchByKeyWord();
                 } else {
                     Message({
                         type: 'warning',
@@ -199,15 +236,6 @@
                 _this.showInfo = true;
                 _this._getArtWork_(item.id);
             },
-            /**
-             * 点击刷新页面
-             * */
-            refresh() {
-                const _this = this;
-                _this.rankList = [];
-                _this.page = 1;
-                _this._getLatest_();
-            },
             getW() {
                 const _this = this;
                 _this.dialogW = _this.client().width;
@@ -215,7 +243,6 @@
                 window.onresize = function () {
                     _this.dialogW = _this.client().width;
                     _this.dialogH = _this.client().height;
-                    // console.log(_this.dialogW, _this.dialogH);
                 };
             },
             //获取浏览器可视区域的宽高  (兼容写法)
@@ -237,6 +264,14 @@
                     }
                 }
             },
+            /**
+             * 点击刷新页面
+             * */
+            refresh() {
+                const _this = this;
+                _this.rankList = [];
+                _this.page = 1;
+            },
             isShrinkShow (item) {
                 const _this = this;
                 if (item && item >= 3) {
@@ -248,6 +283,11 @@
             showAllImg () {
                 const _this = this;
                 _this.isShrink = false;
+            },
+            clearhistory () {
+                const _this = this;
+                _this.keyWords = [];
+                _this.setSearchHistory(null);
             },
         },
         watch: {
@@ -261,7 +301,6 @@
 
     .photo-info {
         height: 100%;
-
         .photo-title {
             font-size: 16px;
             font-weight: bold;

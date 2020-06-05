@@ -17,7 +17,7 @@
                   :autoplay="false"
                   height="775px"
                   indicator-position="none"
-                  style="background-color: rgba(52, 52, 52, .5);padding: 20px;line-height: 800px;"
+                  style="background-color: rgba(0, 0, 0, .7);padding: 20px;line-height: 800px;"
                   :initial-index="imgIndex"
                   @change="showIndex"
                 >
@@ -26,11 +26,14 @@
                        :key="index"
                        style="text-align: center;"
                     >
+                        <!--  @click="downloadImg(item.o, artWork.title)"  -->
+                        <p class="downloadImg" v-if="isShowDownLoad"><a :href="item.o" target="_blank" style="text-decoration: none; color: #66ccff;">点击查看高清全图</a></p>
                         <img
                          v-lazy="item.l"
                          class="image-view"
                          alt=""
                          :class="{censored: isDisplayV2(artWork.x_restrict, artWork.tags)}"
+                         :id="`image_${imgIndex}`"
                         >
                     </el-carousel-item>
                 </el-carousel>
@@ -60,14 +63,13 @@
                 <div class="img-box"
                      v-for="(item, index) in artWork.images"
                      :key="index"
-                     @click="showImgView(index)"
                 >
                     <img
                             v-lazy="item.l"
                             class="image-item"
                             alt=""
-                            style=""
-                            :class="{censored: isDisplayV2(artWork.x_restrict, artWork.tags)}"
+                            @click="showImgView(index, isDisplayV2(artWork.x_restrict, artWork.tags))"
+                            :class="{censored: artWork.x_restrict ? isDisplayV2(artWork.x_restrict, artWork.tags) : isDisplay(artWork.age_limit, artWork.tags)}"
                     />
                 </div>
                 <div class="arrow-wrap" v-if="shrink" @click="showAllImgFn">
@@ -78,8 +80,10 @@
     </div>
 </template>
 <script>
-    import {mapState} from 'vuex'
-
+    import {mapState} from 'vuex';
+    import {Message} from 'element-ui';
+    import fileSave from 'file-saver';
+    import html2canvas from 'html2canvas';
     export default {
         name: "image-dialog",
         data() {
@@ -94,6 +98,10 @@
         },
         components: {},
         props: {
+            isShowDownLoad: {
+                type: Boolean,
+                default: false
+            },
             showInfo: {
                 type: Boolean,
                 required: true,
@@ -109,6 +117,8 @@
         computed: {
             ...mapState(['SETTING']),
         },
+        created () {
+        },
         mounted() {
             const _this = this;
             window.onload = function () {
@@ -119,6 +129,23 @@
             /**
              * 判断是否显示当前内容
              * */
+            isDisplay(val, item) {
+                const _this = this;
+                if (val === 'r18') {
+                    return _this.SETTING.r18 ? false : true;
+                } else if (val === 'r18-g') {
+                    return _this.SETTING.r18g ? false : true;
+                } else {
+                    for (let i = 0; i < item.length; i++) {
+                        if (item[i] === 'R18' || item[i] === 'R-18') {
+                            return _this.SETTING.r18 ? false : true;
+                        } else if (item[i] === 'R-18G' || item[i] === 'r18g') {
+                            return _this.SETTING.r18g ? false : true;
+                        }
+                    }
+                    return false;
+                }
+            },
             isDisplayV2(val, item) {
                 const _this = this;
                 if (val === 1) {
@@ -144,10 +171,18 @@
                 const _this = this;
                 _this.shrink = false;
             },
-            showImgView(index) {
+            showImgView(index, isShow) {
                 const _this = this;
-                _this.imgIndex = index;
-                _this.showImgs = true;
+                if (!isShow) {
+                    _this.imgIndex = index;
+                    _this.showImgs = true;
+                } else {
+                    Message({
+                        type: 'warning',
+                        showClose: true,
+                        message: '此内容不适合所有年龄段或不宜在工作期间访问!',
+                    });
+                }
             },
             getW() {
                 const _this = this;
@@ -197,8 +232,8 @@
                 display: inline-block;
                 width: 100%;
                 overflow: hidden;
-                max-height: 800px;
-                min-height: 300px;
+                max-height: 800px !important;
+                min-height: 300px !important;
                 margin-top: 20px;
                 cursor: pointer;
                 .image-item {
@@ -207,6 +242,13 @@
                     height: 100%;
                     max-height: 800px;
                     min-height: 300px;
+                }
+                .downloadImg {
+                    text-align: right;
+                    color: #66ccff;
+                    height: 20px;
+                    line-height: 20px;
+                    padding-right: 75px;
                 }
             }
 
@@ -290,13 +332,21 @@
         min-height: 300px;
     }
     .pages {
-        background-color: rgba(52, 52, 52, .5);
+        background-color: rgba(0, 0, 0, .7);
         color: #f0f0f0;
         text-align: center;
         height: 30px;
         line-height: 20px;
         font-size: 24px;
         padding: 5px 0;
+    }
+    .downloadImg {
+        text-align: right;
+        color: #66ccff;
+        height: 20px;
+        line-height: 20px;
+        padding-right: 75px;
+        cursor: pointer;
     }
     .censored {
         filter: blur(40px);

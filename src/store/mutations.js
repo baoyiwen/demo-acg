@@ -34,7 +34,7 @@ export default {
                 state.searchHistory.shift();
             }
             state.searchHistory.push(obj);
-            LocalStorage.set('__PIXIV_SETTING', state.searchHistory);
+            LocalStorage.set('__PIXIV_searchHistory', state.searchHistory);
         }
     }
 }

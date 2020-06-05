@@ -7,7 +7,9 @@ import {
     LocalStorage,
 } from '../utils/storage';
 import dayjs from "dayjs";
-import base64 from 'js-base64';
+import {
+    Base64
+} from 'js-base64';
 import da from "element-ui/src/locale/lang/da";
 const BASE_URL = '/api';
 const BASE_URL_PHOTO = 'https://api.imjad.cn/pixiv/'; // Pixiv网站API接口
@@ -188,7 +190,6 @@ export const getTags = ({type}) => ajax(BASE_URL_PHOTO + `v2`, {type});
 
 
 export const api = {
-
     /**
      * @param{Number} id 作品Id
      * @param{Number} index 页数 0起始页
@@ -343,7 +344,7 @@ export const api = {
      * */
    async getSearch (word, page = 1) {
        let searchList,
-           key = `searchList_${base64.encode(word)}_${page}`;
+           key = `searchList_${Base64.encode(word)}_${page}`;
        if (!SessionStorage.has(key)) {
            let res = await searchByWord({
                type: 'search',

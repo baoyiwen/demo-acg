@@ -1,10 +1,11 @@
 <template>
-    <div class="picdis clearFix" id="picdis" @scroll="getScroll">
+    <div class="picdis clearFix" id="picdis" @scroll="getScroll" ref="picdis">
         <waterfall
                 :col="rowNum"
                 :data="rankList"
                 class="waterfall wrapper"
                 id="wrapper"
+                ref="waterfall"
         >
             <template>
                 <a class="warp-a" href="javascript:;" v-for="(rank, index) in rankList" :key="index">
@@ -14,7 +15,7 @@
                         <img
                                 class="img"
                                 v-lazy="rank.images[0].m"
-                                :class="{censored: isDisplay(rank.age_limit, rank.tags)}"
+                                :class="{censored: rank.age_limit ? isDisplay(rank.age_limit, rank.tags) : isDisplayV2(rank.x_restrict, rank.tags)}"
                                 style="width: 100%; height: 100%;object-fit: contain;"
                         />
                         <a href="javascript:;">
@@ -22,6 +23,7 @@
                             <img v-lazy="rank.author.avatar" alt="" style="object-fit: contain;">
                         </a>
                         <div class="imgs" v-if="rank.images.length > 1">
+                            <img src="../../svg/layer.svg" alt="">
                             <span>{{rank.images.length}}</span>
                         </div>
                     </div>
@@ -29,6 +31,7 @@
             </template>
         </waterfall>
         <div class="loading" id="loading" style="height: 100px"></div>
+        <p class="text" v-if="isText">没有更多图片了o(╥﹏╥)o</p>
     </div>
 </template>
 
@@ -45,15 +48,18 @@
                 totalHeight: 0, // 显示视口总高度
                 rowNum: 10, // 显示行数
                 colNum: 4, // 显示列数
-                narrow: 120, // 计算行列参数
+                narrow: 180, // 计算行列参数
                 itemW: 0, // 宽度
-                errorImg: 'this.src="' + require('./img/default.jpg') + '"', //图片加载失败默认图片
             }
         },
         props: {
             rankList: {
                 type: Array,
                 required: true
+            },
+            isText: {
+                type: Boolean,
+                default: false
             }
         },
         computed: {
@@ -70,7 +76,7 @@
                     scrollHeight = scrollDiv.scrollHeight, // 文档总高度
                     viewHight = scrollDiv.offsetHeight, // 视口高度
                     scrollTop = scrollDiv.scrollTop, // 滚动条滚动距离
-                    borderNum = 4; // 容器标签上下边框总宽度\
+                    borderNum = 4; // 容器标签上下边框总宽度
                 if ((scrollHeight + borderNum) === (viewHight + scrollTop)) {
                     let timeout = null;
                     if (timeout !== null) {
@@ -101,11 +107,27 @@
              * 判断是否显示当前内容
              * */
             isDisplay(val, item) {
-                console.log(val);
                 const _this = this;
                 if (val === 'r18') {
                     return _this.SETTING.r18 ? false : true;
                 } else if (val === 'r18-g') {
+                    return _this.SETTING.r18g ? false : true;
+                } else {
+                    for (let i = 0; i < item.length; i++) {
+                        if (item[i] === 'R18' || item[i] === 'R-18') {
+                            return _this.SETTING.r18 ? false : true;
+                        } else if (item[i] === 'R-18G' || item[i] === 'r18g') {
+                            return _this.SETTING.r18g ? false : true;
+                        }
+                    }
+                    return false;
+                }
+            },
+            isDisplayV2(val, item) {
+                const _this = this;
+                if (val === 1) {
+                    return _this.SETTING.r18 ? false : true;
+                } else if (val === 2) {
                     return _this.SETTING.r18g ? false : true;
                 } else {
                     for (let i = 0; i < item.length; i++) {
@@ -118,6 +140,9 @@
                     return false;
                 }
             },
+            /**
+             * 查询图片组
+             * */
         }
     }
 </script>
@@ -131,15 +156,13 @@
         border: 2px solid #66ccff;
         padding: 12px;
         overflow-y: auto;
-
         .waterfall {
             overflow-x: hidden !important;
         }
-
         .warp-a {
             .image-item {
                 position: relative;
-
+                max-height: 600px !important;
                 & > a {
                     display: block;
                     position: absolute;
@@ -173,20 +196,30 @@
                 .imgs {
                     position: absolute;
                     top: 5px;
-                    right: 5px;
-                    width: 20px;
-                    height: 20px;
+                    right: 10px;
+                    // width: 20px;
+                    height: 24px;
+                    padding: 4px;
+                    border-radius: 4px;
                     //background: #66ccff;
-                    background-image: url('../../svg/layer.svg');
-                    background-size: 100% 100%;
-                    background-repeat: no-repeat;
+                    /*background-image: url('../../svg/layer.svg');*/
+                    /*background-size: 100% 100%;*/
+                    /*background-repeat: no-repeat;*/
                     background-color: rgba(52, 52, 52, .4);
-                    line-height: 20px;
+                    line-height: 14px;
                     text-align: center;
+                    &>img {
+                        display: inline-block;
+                        width: 14px;
+                        height: 14px;
+                        vertical-align: middle;
+                        margin-right: 3px;
+                    }
 
                     & > span {
-                        color: #00ff00;
+                        color: #66ccff;
                         font-size: 8px;
+                        vertical-align: middle;
                     }
                 }
             }
@@ -195,6 +228,13 @@
                 filter: blur(40px);
                 position: relative;
             }
+        }
+        .text {
+            text-align: center;
+            color: #66ccff;
+            height: 30px;
+            font-size: 24px;
+            line-height: 30px;
         }
     }
 </style>
