@@ -13,27 +13,29 @@
                     custom-class="test"
             >
                 <el-carousel
-                  arrow="always"
-                  :autoplay="false"
-                  height="775px"
-                  indicator-position="none"
-                  style="background-color: rgba(0, 0, 0, .7);padding: 20px;line-height: 800px;"
-                  :initial-index="imgIndex"
-                  @change="showIndex"
+                        arrow="always"
+                        :autoplay="false"
+                        height="775px"
+                        indicator-position="none"
+                        style="background-color: rgba(0, 0, 0, .7);padding: 20px;line-height: 800px;"
+                        :initial-index="imgIndex"
+                        @change="showIndex"
                 >
                     <el-carousel-item
-                       v-for="(item, index) in artWork.images"
-                       :key="index"
-                       style="text-align: center;"
+                            v-for="(item, index) in artWork.images"
+                            :key="index"
+                            style="text-align: center;"
                     >
                         <!--  @click="downloadImg(item.o, artWork.title)"  -->
-                        <p class="downloadImg" v-if="isShowDownLoad"><a :href="item.o" target="_blank" style="text-decoration: none; color: #66ccff;">点击查看高清全图</a></p>
+                        <p class="downloadImg" v-if="isShowDownLoad"><a :href="item.o" target="_blank"
+                                                                        style="text-decoration: none; color: #66ccff;">点击查看高清全图</a>
+                        </p>
                         <img
-                         v-lazy="item.l"
-                         class="image-view"
-                         alt=""
-                         :class="{censored: isDisplayV2(artWork.x_restrict, artWork.tags)}"
-                         :id="`image_${imgIndex}`"
+                                v-lazy="item.o"
+                                class="image-view"
+                                alt=""
+                                :class="{censored: isDisplayV2(artWork.x_restrict, artWork.tags)}"
+                                :id="`image_${imgIndex}`"
                         >
                     </el-carousel-item>
                 </el-carousel>
@@ -47,7 +49,12 @@
                         <span>{{artWork.author.name}}</span>
                     </div>
                     <div class="img-name">
-                        <p><span style="margin-right: 10px">图片名:</span>{{artWork.title}}</p>
+                        <p>
+                            <span style="margin: 0">图片名:</span>
+                            <span>{{artWork.title}}</span>
+                            <span class="el-icon-view" style="color: #66ccff;display: inline-block;min-width: 30px">{{artWork.view}}</span>
+                            <span class="el-icon-star-on" style="color: #ff0000;display: inline-block;min-width: 30px;">{{artWork.like}}</span>
+                        </p>
                     </div>
                     <div class="tags">
                         <span style="margin-right: 10px">标签:</span>
@@ -65,7 +72,7 @@
                      :key="index"
                 >
                     <img
-                            v-lazy="item.l"
+                            v-lazy="item.o"
                             class="image-item"
                             alt=""
                             @click="showImgView(index, isDisplayV2(artWork.x_restrict, artWork.tags))"
@@ -84,6 +91,7 @@
     import {Message} from 'element-ui';
     import fileSave from 'file-saver';
     import html2canvas from 'html2canvas';
+
     export default {
         name: "image-dialog",
         data() {
@@ -117,13 +125,14 @@
         computed: {
             ...mapState(['SETTING']),
         },
-        created () {
+        created() {
         },
         mounted() {
             const _this = this;
             window.onload = function () {
                 _this.getW();
             }
+            console.log(_this.artWork);
         },
         methods: {
             /**
@@ -163,7 +172,7 @@
                     return false;
                 }
             },
-            showIndex (val, oldVal) {
+            showIndex(val, oldVal) {
                 const _this = this;
                 _this.imgIndex = val;
             },
@@ -236,6 +245,7 @@
                 min-height: 300px !important;
                 margin-top: 20px;
                 cursor: pointer;
+
                 .image-item {
                     object-fit: contain;
                     width: 100%;
@@ -243,6 +253,7 @@
                     max-height: 800px;
                     min-height: 300px;
                 }
+
                 .downloadImg {
                     text-align: right;
                     color: #66ccff;
@@ -303,6 +314,16 @@
                     width: 100%;
                     margin-bottom: 10px;
                     overflow: hidden;
+
+                    & > p {
+                        & > span {
+                            margin-left: 10px;
+                        }
+                        &>span.el-icon-view:before,
+                        .el-icon-star-on:before{
+                            margin-right: 8px;
+                        }
+                    }
                 }
 
                 .tags {
@@ -312,8 +333,10 @@
                     cursor: pointer;
                 }
             }
+
             .carousel {
                 text-align: center;
+
                 .image-view {
                     object-fit: contain;
                     width: 100%;
@@ -324,6 +347,7 @@
             }
         }
     }
+
     .image-view {
         object-fit: contain;
         width: 100%;
@@ -331,6 +355,7 @@
         max-height: 800px;
         min-height: 300px;
     }
+
     .pages {
         background-color: rgba(0, 0, 0, .7);
         color: #f0f0f0;
@@ -340,6 +365,7 @@
         font-size: 24px;
         padding: 5px 0;
     }
+
     .downloadImg {
         text-align: right;
         color: #66ccff;
@@ -348,6 +374,7 @@
         padding-right: 75px;
         cursor: pointer;
     }
+
     .censored {
         filter: blur(40px);
         position: relative;

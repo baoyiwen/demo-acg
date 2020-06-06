@@ -8,13 +8,13 @@
                      size="small ">
                 <el-form-item label="关键字搜索:">
                     <el-select
-                        v-model="keyWords"
-                        multiple
-                        filterable
-                        allow-create
-                        default-first-option
-                        :collapse-tags="true"
-                        placeholder="请输入关键字"
+                            v-model="keyWords"
+                            multiple
+                            filterable
+                            allow-create
+                            default-first-option
+                            :collapse-tags="true"
+                            placeholder="请输入关键字"
                     >
                         <el-option
                                 v-for="(item, index) in searchHistory"
@@ -28,25 +28,26 @@
                     <el-button type="primary" icon="el-icon-search" @click="getSearchByKeyWord(true)">搜索</el-button>
                 </el-form-item>
                 <el-form-item>
-                    <el-button type="text" @click="clearhistory"  icon="el-icon-delete">清空历史</el-button>
+                    <el-button type="text" @click="clearhistory" icon="el-icon-delete">清空历史</el-button>
                 </el-form-item>
             </el-form>
         </div>
         <!--         @scroll="scroll"-->
         <div class="image-list clearFix" id="image-list" @scroll="scroll">
             <pic-display
-              :rank-list="searchList"
-              @scrollFu="scroll"
-              @getItemFn="getItemInfo"
+                    :rank-list="searchList"
+                    :is-text="isText"
+                    @scrollFu="scroll"
+                    @getItemFn="getItemInfo"
             >
             </pic-display>
         </div>
         <imageDialog
-            v-if="artWork !== null"
-            :show-info="showInfo"
-            :art-work="artWork"
-            :is-shrink="isShrink"
-            :is-show-down-load="true"
+                v-if="artWork !== null"
+                :show-info="showInfo"
+                :art-work="artWork"
+                :is-shrink="isShrink"
+                :is-show-down-load="true"
         >
         </imageDialog>
     </div>
@@ -63,6 +64,7 @@
     } from 'element-ui';
     import {mapState, mapActions} from 'vuex'
     import {_debounce} from '../../../../../public/index'
+
     export default {
         name: "photo-info",
         data() {
@@ -76,6 +78,7 @@
                 colNum: 4, // 显示列数
                 narrow: 120, // 计算行列参数
                 itemW: 0, // 宽度
+                isText: false, // 是否显示提示文字
                 page: 1, // 页数
                 busy: true, // 是否正在加载过程中
                 showInfo: false, // 是否显示详细信息
@@ -107,7 +110,7 @@
                 const _this = this;
                 let load = null;
                 let loadT = null;
-                if (!_this.searchList.length) {
+                if (_this.searchList.length === 0) {
                     load = Loading.service({
                         target: document.getElementById('image-list'),
                         text: '正在全力加载中,请稍等...'
@@ -126,10 +129,12 @@
                         showClose: true,
                         message: '访问成功!',
                     });
-                    if (search.data.length) {
+                    if (search.data.length === 0) {
                         _this.isText = true;
+                    } else {
+                        _this.isText = false;
+                        _this.searchList = _this.searchList.concat(search.data);
                     }
-                    _this.searchList = _this.searchList.concat(search.data);
                 } else {
                     Message({
                         type: 'error',
@@ -146,7 +151,7 @@
                 });
                 setTimeout(() => {
                     _this.busy = true;
-                }, 2000);
+                }, 3000);
             },
             async _getArtWork_(id) {
                 const _this = this;
@@ -171,20 +176,20 @@
             /**
              * 点击查询方法
              * */
-            getSearchByKeyWord (item) {
+            getSearchByKeyWord(item) {
                 const _this = this;
                 if (item) {
                     _this.searchList = [];
                     _this.page = 1;
                 }
                 let keyWordList = _this.keyWords.filter(item => {
-                    return  item && item.trim();
-                }),
+                        return item && item.trim();
+                    }),
                     word = [];
                 keyWordList.forEach(val => {
-                    word.push(val.replace(/\s*/g,""));
-                     _this.setSearchHistory(val.replace(/\s*/g,""));
-                 });
+                    word.push(val.replace(/\s*/g, ""));
+                    _this.setSearchHistory(val.replace(/\s*/g, ""));
+                });
                 let keyWords = word.length > 0 ? word.join('  ') : '制服';
                 _this._getSearchByKeyWord_(keyWords);
             },
@@ -272,7 +277,7 @@
                 _this.rankList = [];
                 _this.page = 1;
             },
-            isShrinkShow (item) {
+            isShrinkShow(item) {
                 const _this = this;
                 if (item && item >= 3) {
                     _this.isShrink = true;
@@ -280,19 +285,17 @@
                     _this.isShrink = false;
                 }
             },
-            showAllImg () {
+            showAllImg() {
                 const _this = this;
                 _this.isShrink = false;
             },
-            clearhistory () {
+            clearhistory() {
                 const _this = this;
                 _this.keyWords = [];
                 _this.setSearchHistory(null);
             },
         },
-        watch: {
-
-        },
+        watch: {},
     }
 </script>
 
@@ -301,6 +304,7 @@
 
     .photo-info {
         height: 100%;
+
         .photo-title {
             font-size: 16px;
             font-weight: bold;
@@ -325,7 +329,6 @@
             height: calc(~'100% - 122px');
             width: 100%;
             background-color: #f0f0f0;
-            border: 2px solid #66ccff;
             padding: 12px;
             overflow-y: auto;
         }
@@ -334,10 +337,12 @@
             position: relative;
             width: 100%;
             text-align: center;
+
             &.shrink {
                 max-height: 1000px;
                 overflow: hidden;
             }
+
             .img-box {
                 display: inline-block;
                 width: 100%;
@@ -345,6 +350,7 @@
                 max-height: 800px;
                 min-height: 300px;
                 margin-top: 20px;
+
                 .image-item {
                     object-fit: contain;
                     width: 100%;
@@ -353,6 +359,7 @@
                     min-height: 300px;
                 }
             }
+
             .arrow-wrap {
                 position: absolute;
                 bottom: 0;
@@ -360,13 +367,14 @@
                 filter: blur(4px);
                 background-color: rgba(52, 52, 52, 1);
                 cursor: pointer;
+
                 .arrow {
                     display: inline-block;
                     width: 60px;
                     height: 60px;
                     background-image: url("../../../../../svg/dropdown.svg");
                     background-repeat: no-repeat;
-                    background-size:100% 100%;
+                    background-size: 100% 100%;
                 }
             }
 
@@ -377,29 +385,34 @@
                 text-align: left;
                 padding: 10px 36px;
                 font-size: 16px;
+
                 .user-info {
                     height: 40px;
                     width: 100%;
                     overflow: hidden;
                     margin-bottom: 10px;
                     cursor: pointer;
-                    &>img {
+
+                    & > img {
                         width: 36px;
                         height: 36px;
                         border-radius: 100%;
                         margin-right: 10px;
                         vertical-align: middle;
                     }
-                    &>span {
+
+                    & > span {
                         vertical-align: middle;
                     }
                 }
+
                 .img-name {
                     height: 25px;
                     width: 100%;
                     margin-bottom: 10px;
                     overflow: hidden;
                 }
+
                 .tags {
                     width: 100%;
                     margin-bottom: 10px;
@@ -414,6 +427,7 @@
         filter: blur(40px);
         position: relative;
     }
+
     .el-form-item .el-form-item__content .el-select .el-input__inner {
         padding-right: 0 !important;
     }

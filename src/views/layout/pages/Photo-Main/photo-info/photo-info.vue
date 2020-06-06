@@ -109,8 +109,10 @@
                         showClose: true,
                         message: '访问成功!',
                     });
-                    if (rank.data.length) {
+                    if (!rank.data.length) {
                         _this.isText = true;
+                    } else {
+                        _this.isText = false;
                     }
                     _this.rankList = _this.rankList.concat(rank.data);
                 } else {
@@ -286,7 +288,6 @@
             height: calc(~'100% - 122px');
             width: 100%;
             background-color: #f0f0f0;
-            border: 2px solid #66ccff;
             padding: 12px;
             overflow-y: auto;
         }
