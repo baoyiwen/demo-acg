@@ -2,7 +2,7 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import layout from '@/views/layout/Layout'
 
-Vue.use(VueRouter)
+Vue.use(VueRouter);
 
 export const routes = [
     {
@@ -122,15 +122,16 @@ export const routes = [
     //   // which is lazy-loaded when the route is visited.
     //   component: () => import(/* webpackChunkName: "about" */ '../views/About.vue')
     // }
-]
+];
 
 const router = new VueRouter({
     mode: 'history',
     base: process.env.BASE_URL,
     routes
-})
+});
+console.log(router.options.routes[0].children);
 
 export default router
 export const mapRoutes = {
 
-}
+};

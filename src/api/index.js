@@ -10,7 +10,7 @@ import dayjs from "dayjs";
 import {
     Base64
 } from 'js-base64';
-import da from "element-ui/src/locale/lang/da";
+
 const BASE_URL = '/api';
 const BASE_URL_PHOTO = 'https://api.imjad.cn/pixiv/'; // Pixiv网站API接口
 const imgProxy = url => url.replace(/i.pximg.net/g, 'pximg.pixiv-viewer.workers.dev'); // 对图片设置代理，避免403访问权限
@@ -125,7 +125,7 @@ const parseIllustV1 = (data) => {
             s: imgProxy(data.image_urls.px_128x128),
             m: imgProxy(data.image_urls.px_480mw),
             l: imgProxy(data.image_urls.large),
-             // o: imgProxy(data.meta_single_page.original_image_url)
+            // o: imgProxy(data.meta_single_page.original_image_url)
         });
     } else {
         images = data.meta_pages.map(data => {
@@ -136,7 +136,8 @@ const parseIllustV1 = (data) => {
                 // o: imgProxy(data.image_urls.original)
             }
         });
-    };
+    }
+    ;
 
     const artwork = {
         id,
@@ -162,19 +163,23 @@ const parseIllustV1 = (data) => {
 
     return artwork
 };
-
-
 // 获取城市列表信息
 export const getCityList = () => ajax(BASE_URL + `/Wz/CityList`, {key: 'd103c3a23f504c37ac4371e94d83600b'});
 // 获取车辆违章信息
 export const getCarVORInfo = (data) => ajax(BASE_URL + `/Wz/Lookup`, data);
 
+
 // 获取首页图片
 export const getHomePhoto = (data) => ajax(BASE_URL_PHOTO + `v1`, data);
 // 获取最新作品
-export const  getLatestByDay = ({type, offset, per_page, page}) => ajax(BASE_URL_PHOTO + `v1`, {type, offset, per_page, page});
+export const getLatestByDay = ({type, offset, per_page, page}) => ajax(BASE_URL_PHOTO + `v1`, {
+    type,
+    offset,
+    per_page,
+    page
+});
 // 获取相关作品
-export const  getRelatedById = ({type, id, page}) => ajax(BASE_URL_PHOTO + `v2`, {type, id, page});
+export const getRelatedById = ({type, id, page}) => ajax(BASE_URL_PHOTO + `v2`, {type, id, page});
 // 获取排行榜数据默认周榜
 export const getRankListByMode = ({type, mode, page, date}) => ajax(BASE_URL_PHOTO + `v2`, {type, mode, page, date})
 // 搜索接口
@@ -187,28 +192,28 @@ export const getMemberArtworkById = ({type, id}) => ajax(BASE_URL_PHOTO + `v2`, 
 export const getMemberInfoByid = ({type, id}) => ajax(BASE_URL_PHOTO + `v2`, {type, id});
 // 获取热门标签
 export const getTags = ({type}) => ajax(BASE_URL_PHOTO + `v2`, {type});
-
-
+/**
+ * 封装请求API
+ * */
 export const api = {
     /**
      * @param{Number} id 作品Id
      * @param{Number} index 页数 0起始页
      * */
-    url (id, index) {
-      if (!index) {
-          return `https://pixiv.cat/${id}.png`
-      }  else {
-          return `https://pixiv.cat/${id}-${index}.png`
-      }
+    url(id, index) {
+        if (!index) {
+            return `https://pixiv.cat/${id}.png`
+        } else {
+            return `https://pixiv.cat/${id}-${index}.png`
+        }
     },
-
     /**
      *获取最新作品
      * @param {Number} offset 偏移值
      * @param {Number} per_page 每页数量
      * @param {Number} page 页数
      * */
-    async getLatest (offset = 0, per_page = 40, page = 1) {
+    async getLatest(offset = 0, per_page = 40, page = 1) {
         let res = await getLatestByDay({
             type: 'latest',
             offset,
@@ -232,7 +237,7 @@ export const api = {
         }
 
         artList = data.map(art => {
-            let { id, title, caption, tags, tools, width, height, age_limit } = art;
+            let {id, title, caption, tags, tools, width, height, age_limit} = art;
             return {
                 id,
                 title,
@@ -257,13 +262,13 @@ export const api = {
             }
         });
         return {status: 0, data: artList};
-0    },
+    },
     /**
      * 查询相关作品
      * @param {Number} id 作品id
      * @param {Number} page 页数[1, 5]
      * */
-    async getRelated (id, page = 1) {
+    async getRelated(id, page = 1) {
         let relatedList;
         if (!SessionStorage.has(`relatedList_${id}_p${page}`)) {
             let res = await getRelatedById({
@@ -304,7 +309,7 @@ export const api = {
      * @param {Number} page 页数
      * @param {String} date YYYY-MM-DD 默认为「前天」
      */
-    async getRankList (mode = 'week', page = 1, date = dayjs().subtract(2, 'day').format('YYYY-MM-DD')) {
+    async getRankList(mode = 'week', page = 1, date = dayjs().subtract(2, 'day').format('YYYY-MM-DD')) {
         let rankList;
         date = dayjs(date).format('YYYY-MM-DD');
         if (!SessionStorage.has(`rankList_${mode}_${date}_${page}`)) {
@@ -316,7 +321,7 @@ export const api = {
             });
             let data;
             if (res.illusts) {
-               data = res.illusts;
+                data = res.illusts;
             } else if (res.error) {
                 return {
                     status: -1,
@@ -342,48 +347,49 @@ export const api = {
      * @param {String} word 关键词
      * @param {Number} page 页数
      * */
-   async getSearch (word, page = 1) {
-       let searchList,
-           key = `searchList_${Base64.encode(word)}_${page}`;
-       if (!SessionStorage.has(key)) {
-           let res = await searchByWord({
-               type: 'search',
-               word,
-               page,
-           });
+    async getSearch(word, page = 1) {
+        let searchList,
+            key = `searchList_${Base64.encode(word)}_${page}`;
+        if (!SessionStorage.has(key)) {
+            let res = await searchByWord({
+                type: 'search',
+                word,
+                page,
+                req_auth: false,
+            });
 
-           let data;
-           if (res.illusts) {
-               data = res.illusts;
-           } else if (res.error) {
-               return {
-                   status: -1,
-                   msg: res.user_message || res.error.message,
-               }
-           } else {
-               return {
-                   status: -1,
-                   msg: '未知错误,请及时联系管理员!',
-               }
-           }
-           searchList = data.map(art => {
-               return parseIllustV2(art);
-           });
-           SessionStorage.set(key, searchList, 60 * 60 * 3);
-       } else {
-           searchList = SessionStorage.get(key);
-       }
-       return {status: 0, data: searchList};
+            let data;
+            if (res.illusts) {
+                data = res.illusts;
+            } else if (res.error) {
+                return {
+                    status: -1,
+                    msg: res.user_message || res.error.message,
+                }
+            } else {
+                return {
+                    status: -1,
+                    msg: '未知错误,请及时联系管理员!',
+                }
+            }
+            searchList = data.map(art => {
+                return parseIllustV2(art);
+            });
+            SessionStorage.set(key, searchList, 60 * 60 * 3);
+        } else {
+            searchList = SessionStorage.get(key);
+        }
+        return {status: 0, data: searchList};
     },
     /**
      * 查询作品详情
      * @param {Number} id: 作品Id
      * */
-    async getArtWork (id) {
+    async getArtWork(id) {
         let artWork;
         if (!LocalStorage.has(`artwork_${id}`)) {
             let res = await getArtWorkById({
-                type: 'illusts',
+                type: 'illust',
                 id,
             });
 
@@ -414,7 +420,7 @@ export const api = {
      * 查询作者信息
      * @param {Number} id: 画师Id
      * */
-    async getMemberInfo (id) {
+    async getMemberInfo(id) {
         let memberInfo;
         if (!LocalStorage.has(`memberInfo_${id}`)) {
             let res = await getMemberInfoByid({
@@ -442,7 +448,7 @@ export const api = {
      * 查询作者作品
      * @param {Number} id: 画师Id
      * */
-    async getMemberArtwork (id) {
+    async getMemberArtwork(id) {
         let memberArtWork;
         if (!LocalStorage.has(`memberArtWork_${id}`)) {
             let res = await getMemberArtworkById({
@@ -466,7 +472,7 @@ export const api = {
             }
 
             memberArtWork = data.map(art => {
-               return parseIllustV2(art)
+                return parseIllustV2(art)
             });
 
             LocalStorage.set(`memberArtWork_${id}`, memberArtWork);
@@ -479,7 +485,7 @@ export const api = {
     /**
      * 获取热门标签
      * */
-    async getTags () {
+    async getTags() {
         let tags;
         if (!LocalStorage.has(`tags`)) {
             let res = await getTags({
@@ -524,9 +530,9 @@ export const api = {
             val.works.map(acc => {
                 console.log(acc.work);
                 // console.log(parseIllustV1(acc.work));
-               // acc.work.map (ac => {
-               //
-               // })
+                // acc.work.map (ac => {
+                //
+                // })
             })
         })
     },

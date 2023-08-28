@@ -1,7 +1,7 @@
 const path = require('path');
 
 module.exports = {
-    // publicPath: './', // 基本路径
+     publicPath: './', // 基本路径
     // outputDir: 'dist', // 输出文件目录
     // lintOnSave: false, // eslint-loader 是否在保存的时候检查
     // // see https://github.com/vuejs/vue-cli/blob/dev/docs/webpack.md
@@ -50,7 +50,7 @@ module.exports = {
             postcss: {},// 这里的选项会传递给 postcss-loader
             sass: {},  // 这里的选项会传递给 sass-loader
         }, // css预设器配置项 详见https://cli.vuejs.org/zh/config/#css-loaderoptions
-        modules: false // 启用 CSS modules for all css / pre-processor files.
+        // modules: true // 启用 CSS modules for all css / pre-processor files.
     },
     // webpack-dev-server 相关配置
     devServer: {
@@ -58,10 +58,12 @@ module.exports = {
         host: 'localhost', // 允许外部ip访问
         port: 10089, // 端口
         https: false, // 启用https
-        overlay: {
-            warnings: true,
-            errors: true
-        }, // 错误、警告在页面弹出
+        client: {
+            overlay: {
+                warnings: true,
+                errors: true
+            }, // 错误、警告在页面弹出
+        },
         proxy: {
             '/api': {
                 target: 'http://api.avatardata.cn',

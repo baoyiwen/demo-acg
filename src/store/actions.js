@@ -11,7 +11,9 @@ import {
     SAVE_SETTING,
     SET_SEARCH_HISTORY,
 } from "./mutation-type"
-import {LocalStorage} from "../utils/storage";
+import {
+    LocalStorage
+} from "../utils/storage";
 
 export default {
     // 同步获取路由信息

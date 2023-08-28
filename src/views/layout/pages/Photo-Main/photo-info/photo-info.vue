@@ -78,10 +78,12 @@
         },
         mounted() {
             const _this = this;
+            _this.getW();
             window.onload = function () {
                 _this.getW();
                 //_this.getImageItemWH();
             };
+            console.log(this.SETTING);
             _this.offset = 1;
             _this._getLatest_();
         },
@@ -217,7 +219,6 @@
                 window.onresize = function () {
                     _this.dialogW = _this.client().width;
                     _this.dialogH = _this.client().height;
-                    // console.log(_this.dialogW, _this.dialogH);
                 };
             },
             //获取浏览器可视区域的宽高  (兼容写法)

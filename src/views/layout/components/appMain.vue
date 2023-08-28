@@ -5,10 +5,14 @@
             <div class="left-nav">
                 <menu-bar class="nemu-bar"></menu-bar>
             </div>
+<!--            <taber-bar />-->
             <div class="right-nav">
-                <keep-alive>
-                    <router-view/>
-                </keep-alive>
+                <taber-bar />
+                <div class="content">
+                    <keep-alive>
+                        <router-view/>
+                    </keep-alive>
+                </div>
             </div>
         </section>
     </div>
@@ -18,12 +22,14 @@
     import menuBar from "./listMenu/menuBar";
     import HeaderMain from "./header/HeaderMain";
     import FooterMain from "./footer/FooterMain";
+    import TaberBar from "./taberBar/taber-bar";
     export default {
         name: "appMain",
         components: {
             menuBar,
             HeaderMain,
-            FooterMain
+            FooterMain,
+            TaberBar,
         },
         data() {
             return {
@@ -54,7 +60,7 @@
         }
         .main {
             height: 100%;
-            width: 85%;
+            width: 100%;
             margin: 0 auto;
             .left-nav {
                 display: inline-block;
@@ -84,6 +90,10 @@
                 margin-left: 20px;
                 height: calc(~"100% - 0px");
                 background: #f2f2f2;
+                .content {
+                    width: 100%;
+                    height: calc(~"100% - 50px");
+                }
             }
         }
 
